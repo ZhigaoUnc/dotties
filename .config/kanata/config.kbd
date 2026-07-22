@@ -1,0 +1,177 @@
+(defcfg
+  process-unmapped-keys no
+  linux-dev (/dev/input/event4 /dev/input/event5)
+  tooltip-layer-changes yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+)
+(defvirtualkeys
+  alt lalt
+)
+
+(defsrc
+  esc  f1   f2   f3   f4   f5   f6   f7      f9   f10  f11  f12  prtsc
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt            spc            ralt  rctl
+  up
+  left down rght
+)
+
+(defalias
+  neru-grid (cmd bash -c "runuser -u unc -- env XDG_CURRENT_DESKTOP=Sway WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/Downloads/bin/neru grid")
+  neru-scr  (cmd bash -c "runuser -u unc -- env XDG_CURRENT_DESKTOP=Sway WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/Downloads/bin/neru scroll")
+  neru-rg   (cmd bash -c "runuser -u unc -- env XDG_CURRENT_DESKTOP=Sway WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/Downloads/bin/neru recursive_grid")
+  neru-off  (cmd bash -c "runuser -u unc -- env XDG_CURRENT_DESKTOP=Sway WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/Downloads/bin/neru deactivate")
+  mnext (cmd runuser -u unc -- env DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_RUNTIME_DIR=/run/user/1000 /usr/bin/playerctl next)
+  mprev (cmd runuser -u unc -- env DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_RUNTIME_DIR=/run/user/1000 /usr/bin/playerctl previous)
+  mpp   (cmd runuser -u unc -- env DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_RUNTIME_DIR=/run/user/1000 /usr/bin/playerctl play-pause)
+  mstop (cmd runuser -u unc -- env DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_RUNTIME_DIR=/run/user/1000 /usr/bin/playerctl stop)
+  mff   (cmd runuser -u unc -- env DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_RUNTIME_DIR=/run/user/1000 /usr/bin/playerctl position 5+)
+  mrw   (cmd runuser -u unc -- env DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_RUNTIME_DIR=/run/user/1000 /usr/bin/playerctl position 5-)
+
+  test-notify (cmd bash -c "date >> /tmp/kanata_test.log")
+;;--- MOUSE LOGIC ---
+  mouse (layer-toggle mouse)
+  mouse_precision (layer-toggle mouse_precision)
+  af4 (multi lmet q)
+  launch (multi lmet d)
+  altp (multi lalt p)
+  atab (macro (on-press press-virtualkey alt) 5 tab)
+  ;; Use 'movemouse-' NOT 'move-'
+  ;; (movemouse-direction interval-ms distance)
+  m-u (movemouse-up 10 5)
+  m-d (movemouse-down 10 5)
+  m-l (movemouse-left 10 5)
+  m-r (movemouse-right 10 5)
+  
+  ;; Precision Movement
+  p-u (movemouse-up 10 1)
+  p-d (movemouse-down 10 1)
+  p-l (movemouse-left 10 1)
+  p-r (movemouse-right 10 1)
+  
+  ;; Scroll & Clicks (These remain the same)
+  mw-u (mwheel-up 50 120)
+  mw-d (mwheel-down 50 120)
+  lft mlft
+  rgt mrgt
+  mid mmid 
+  ;; --- LAYER TRIGGERS ---
+  pwr      (layer-toggle power)
+  nav_tap (tap-hold-press 200 200 (multi (on-release release-virtualkey alt) lalt) (multi (layer-toggle nav) (on-release release-virtualkey alt)))
+  f13_stick (one-shot 2000 f13)
+  tg_game  (layer-switch gaming)
+  tg_base  (layer-switch base)
+  tg_qwer  (layer-switch qwerty)
+  tg_back  (layer-switch base)
+  ;;atab     (multi (one-shot 2000 lalt) tab)
+  cap_mod  (tap-hold 200 200 esc lctl)
+  grv_mod (tap-hold 200 200 grv f13)
+  ;; --- STICKY MODS ---
+  sft      (one-shot 2000 lsft)
+  ctl      (one-shot 2000 lctl)
+  alt      (one-shot 2000 lalt)
+  met      (one-shot 2000 lmet)
+  rctl_syms (tap-hold 200 200 rctl (layer-toggle symbols))
+
+;; --- APPS ---
+  brave (cmd bash -c "runuser -u unc -- env DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/.config/scripts/focus-or-launch.sh brave-origin-beta brave-origin-beta")
+  obsdn (cmd bash -c "runuser -u unc -- env DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/.config/scripts/focus-or-launch.sh obsidian obsidian")
+  siyk (cmd bash -c "runuser -u unc -- env DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/.config/scripts/focus-or-launch.sh sioyek sioyek")
+  zotro (cmd bash -c "runuser -u unc -- env DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/.config/scripts/focus-or-launch.sh Zotero zotero")
+  anki (cmd bash -c "runuser -u unc -- env DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/.config/scripts/focus-or-launch.sh anki anki")
+  vsdkp (cmd bash -c "runuser -u unc -- env DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus /home/unc/.config/scripts/focus-or-launch.sh vesktop vesktop")
+)
+
+(deflayer base
+  esc  brdn brup _    _    _ _ _   _    _    _    _    prtsc
+  grv 1    2  3    4    5    6    7    8    9    0    -    =    bspc
+  tab  b    l    d    c    v    j    f    o    u    ;    [    ]    \
+  @cap_mod n r    t    s    g    y    h    a    e    i    '    ret
+  lsft x    q    m    w    z    k    p    ,    .    /    rsft
+  lctl lmet @nav_tap        spc            @pwr   @rctl_syms
+  up
+  left down rght
+)
+
+(deflayer qwerty
+  esc  _    _    _    _    _ _ _  _    _    _    _    prtsc
+  @grv_mod 1  2  3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @cap_mod a s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet @nav_tap       spc            @pwr   @rctl_syms
+  up
+  left down rght
+)
+
+(deflayer gaming
+  _    _    _    _    _    _    _    _        _    _    _    _    _
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  lctl a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt            spc              @pwr   _
+  up
+  left down rght
+)
+
+ 
+(deflayer power
+  @tg_qwer  @tg_back  @tg_game    _    _    _    _    _        _    _    _    _    _
+  grv  f1   f2   f3   f4   f5   f6   f7    f8    f9 f10  f11  f12    @af4
+  _    1    2    3    4    5    6    7    8    9    0    _    _    _
+  @cap_mod @met @alt @ctl @sft  -    left down up  rght    C-bspc C-del   _
+  _    [    ]    \    /    grv  '    home    end    ;    /    _
+  _    _            lalt      @met         _    _    
+  _
+  _    _    _
+)
+
+(deflayer symbols
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    S-1  S-2  S-3  S-4  S-5  S-6  S-7  S-8  S-9  S-0  _    _    _
+  _    S-min  S-lbrc lbrc  S-9   min  S-eql  S-0 rbrc S-rbrc  _  _ _
+  _    _    _    _    S-grv   eql    \  S-\  S-,  S-.  _  _
+  _    _    _              _               _    _
+  _
+  _    _    _
+)
+
+(deflayer mouse
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _     @m-u  @mw-d @mw-u _    _    _    _    _    _    _    _    _
+  _    @m-l  @m-d  @m-r  _    _    _     @lft @mouse_precision @rgt   _  _      _
+  _    _     _     _     _    _    _    _    _    _    _    _
+  _    _     _              _                _    _
+  _
+  _    _    _
+)
+
+(deflayer mouse_precision
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _     @p-u _  _    _    _    _    _    _    _    _    _    _
+  _    @p-l  @p-d  @p-r  _    _    _    _    _    _    _    _    _
+  _    _     _     _     _    _    _    _    _    _    _    _
+  _    _     _              _                _    _
+  _
+  _    _    _
+)
+
+
+(deflayer nav
+  _    _    _    _    _    _    _    _        _    _    _    _    _
+  @mpp _    _    @mrw @mff    _    _    _     _    _    _    _    _    _
+  @atab @mprev  mute  vold    volu  @mnext lrld pgdn pgup end  @altp _ _  _ 
+  esc  @met @alt   C-S-tab C-tab _    @neru-grid @neru-scr @neru-rg   rght bspc _    lrld
+  _    C-M-l C-M-r bck  @f13_stick  _  @mouse      _  _ _  _    _
+  _    _   _         @mouse             _   _
+  up
+  left down rght
+)

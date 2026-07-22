@@ -1,0 +1,178 @@
+(defcfg
+  process-unmapped-keys no
+  linux-dev (/dev/input/event4 /dev/input/event5)
+  tooltip-layer-changes yes
+  concurrent-tap-hold yes
+  danger-enable-cmd yes
+)
+
+(defsrc
+  esc  f1   f2   f3   f4   f5   f6   f7      f9   f10  f11  f12  prtsc
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt            spc            ralt  rctl
+  up
+  left down rght
+)
+
+(defalias
+;;--- MOUSE LOGIC ---
+  mouse (layer-toggle mouse)
+  mouse_precision (layer-toggle mouse_precision)
+  
+  ;; Use 'movemouse-' NOT 'move-'
+  ;; (movemouse-direction interval-ms distance)
+  m-u (movemouse-up 10 5)
+  m-d (movemouse-down 10 5)
+  m-l (movemouse-left 10 5)
+  m-r (movemouse-right 10 5)
+  
+  ;; Precision Movement
+  p-u (movemouse-up 10 1)
+  p-d (movemouse-down 10 1)
+  p-l (movemouse-left 10 1)
+  p-r (movemouse-right 10 1)
+  
+  ;; Scroll & Clicks (These remain the same)
+  mw-u (mwheel-up 50 120)
+  mw-d (mwheel-down 50 120)
+  lft mlft
+  rgt mrgt
+  mid mmid 
+  ;; --- LAYER TRIGGERS ---
+  pwr      (layer-toggle power)
+  nav_tap  (layer-toggle nav)
+  apps_tap (layer-toggle apps)
+  f13_stick (one-shot 2000 f13)
+  tg_game  (layer-switch gaming)
+  tg_base  (layer-switch base)
+  symbols  (layer-toggle symbols)
+  tg_gall  (layer-switch gallium)
+  tg_back  (layer-switch base)
+  atab     (multi (one-shot 2000 lalt) tab)
+  cap_mod  (tap-hold 200 200 esc lctl)
+
+  ;; --- STICKY MODS ---
+  sft      (one-shot 2000 lsft)
+  ctl      (one-shot 2000 lctl)
+  alt      (one-shot 2000 lalt)
+  met      (one-shot 2000 lmet)
+
+  ;; --- APPS ---
+  app_term (cmd bash -c "kitty")
+  app_brow (cmd bash -c "brave-origin-beta")
+  app_file (cmd bash -c "nemo")
+  app_code (cmd bash -c "code")
+  app_spot (cmd bash -c "spotify")
+  app_disc (cmd bash -c "vesktop")
+  app_slep (cmd bash -c "systemctl suspend")
+)
+
+(deflayer base
+  esc  _    _    _    _    _ _ _  _    _    _    _    prtsc
+  grv 1  2  3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @cap_mod a s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet @nav_tap       spc            @pwr   @symbols
+  up
+  left down rght
+)
+
+(deflayer gallium
+  esc  brdn brup _    _    _ _ _   _    _    _    _    prtsc
+  grv 1    2  3    4    5    6    7    8    9    0    -    =    bspc
+  tab  b    l    d    c    v    j    f    o    u    ;    [    ]    \
+  @cap_mod n r    t    s    g    y    h    a    e    i    '    ret
+  lsft x    q    m    w    z    k    p    ,    .    /    rsft
+  lctl lmet @nav_tap        spc            @pwr   @symbols
+  up
+  left down rght
+)
+
+(deflayer gaming
+  _    _    _    _    _    _    _    _        _    _    _    _    _
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  lctl a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt            spc              @pwr   @apps_tap
+  up
+  left down rght
+)
+
+(deflayer nav
+  _    _    _    _    _    _    _    _        _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  @atab @met  A-tab C-S-tab C-tab volu lrld pgdn pgup end  prtsc _ _  _ 
+  esc  @met @alt @ctl  @sft     vold left down up    rght bspc _    lrld
+  _   C-M-l C-M-r bck  fwd  pp   @mouse  @symbols _ _  _    _
+  _    @f13_stick    _         @mouse             @apps_tap   _
+  up
+  left down rght
+)
+
+(deflayer power
+  @tg_back  @tg_gall  @tg_game    _    _    _    _    _        _    _    _    _    _
+  grv  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    1    2    3    4    5    6    7    8    9    0    _    _    _
+  @cap_mod @met @alt @ctl @sft -    h    j    k    l    C-bspc _    _
+  _    [    ]    \    /    grv  '    -    =    ;    /    _
+  _    _            lalt      @met         _    _    
+  _
+  _    _    _
+)
+
+(deflayer apps
+  ;; Row 1: Function Keys (13 keys)
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  ;; Row 2: Numbers/Top (14 keys)
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  ;; Row 3: Tab Row (14 keys)
+  _    _    _    @app_file @app_code @app_term @app_disc @app_slep _    _    _    _    _    _
+  ;; Row 4: Home Row (13 keys)
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  ;; Row 5: Shift Row (12 keys)
+  _    _    _    _    _    @app_brow _    _    _    _    _    _
+  ;; Row 6: Bottom Row (6 keys)
+  _    _    _              _              _    _
+  ;; Row 7: Up arrow (1 key)
+  _
+  ;; Row 8: Left/Down/Right (3 keys)
+  _    _    _
+)
+
+(deflayer symbols
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    S-1  S-2  S-3  S-4  S-5  S-6  S-7  S-8  S-9  S-0  _    _    _
+  _    S-grv eql  S-eql \ _    _    /    S-lbrc S-rbrc _ _  _  _
+  _    _    _    S-comm S-.  _    _    _    lbrc rbrc _  _    _
+  _    _    _    min  S-min _    _    _    _    _    _    _
+  _    _    _              _               _    _
+  _
+  _    _    _
+)
+
+(deflayer mouse
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _     @m-u  @mw-u @mw-d _    _    _    _    _    _    _    _    _
+  _    @m-l  @m-d  @m-r  _    _    _     @lft @mouse_precision @rgt   _  _      _
+  _    _     _     _     _    _    _    _    _    _    _    _
+  _    _     _              _                _    _
+  _
+  _    _    _
+)
+
+(deflayer mouse_precision
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _     @p-u _  _    _    _    _    _    _    _    _    _    _
+  _    @p-l  @p-d  @p-r  _    _    _    _    _    _    _    _    _
+  _    _     _     _     _    _    _    _    _    _    _    _
+  _    _     _              _                _    _
+  _
+  _    _    _
+)

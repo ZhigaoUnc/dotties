@@ -1,0 +1,75 @@
+(defcfg
+  process-unmapped-keys yes
+  linux-dev (/dev/input/event4 /dev/input/event5)
+)
+(defsrc
+  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  q    w    e    r    t         y    u    i    o    p
+  a    s    d    f    g         h    j    k    l    ;
+  z    x    c    v    b         n    m    ,    .    /
+  caps lmet lalt spc  ralt      rctl
+)
+
+(defalias
+  ;; --- PRIMARY TRIGGERS ---
+  pwr  (layer-toggle power)
+  f24_mod f24
+
+  ;; Tap Alt, Hold Nav
+  nav_tap (tap-hold 200 200 lalt (layer-toggle nav))
+
+  ;; Caps: Tap Esc, Hold Ctrl
+  cap_mod (tap-hold 200 200 esc lctl)
+
+  ;; --- GAMING ---
+  tg_game (layer-switch gaming)
+  tg_base (layer-switch base)
+
+  ;; --- ONE-SHOTS ---
+  s_base (one-shot 2000 (layer-toggle shifted-base))
+  sft    (one-shot 2000 lsft)
+  ctl    (one-shot 2000 lctl)
+  alt    (one-shot 2000 lalt)
+  met    (one-shot 2000 lmet)
+  ralt_sticky (one-shot 2000 ralt)
+)
+
+(deflayer base
+  brdn brup _    _    mute vold volu _    _    _    _    _
+  q    w    e    r    t         y    u    i    o    p
+  a    s    d    f    g         h    j    k    l    ;
+  z    x    c    v    b         n    m    ,    .    /
+  @cap_mod lmet @nav_tap spc @pwr   @tg_game
+)
+
+(deflayer gaming
+  brdn brup _    _    mute vold volu _    _    _    _    _
+  q    w    e    r    t         y    u    i    o    p
+  a    s    d    f    g         h    j    k    l    ;
+  z    x    c    v    b         n    m    ,    .    /
+  lctl lmet lalt spc  @pwr      @tg_base
+)
+
+(deflayer nav
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    A-tab C-S-tab C-tab volu   lrld home caps end  prtsc
+  @met @alt  @ctl    @sft  vold   left down up   rght bspc
+  C-M-l C-M-r bck   fwd   pp     XX   pgdn pgup M-spc ret
+  _    _    _    @s_base @tg_game  _
+)
+
+(deflayer power
+      _    _    _    _    _    _    _    _    _    _    _    _
+      1    2    3    4    5         6    7    8    9    0
+      @met @alt @ctl @sft  -        h   j     k    l    bspc
+      [    ]    \    /    grv       '    -    =    ;    /
+      _  _    _    lmet XX   _
+    )
+
+(deflayer shifted-base
+  _    _    _    _    _    _    _    _    _    _    _    _
+  S-q  S-w  S-e  S-r  S-t       S-y  S-u  S-i  S-o  S-p
+  S-a  S-s  S-d  S-f  S-g       S-h  S-j  S-k  S-l  S-;
+  S-z  S-x  S-c  S-v  S-b       S-n  S-m  S-,  S-.  S-/
+  _    _    _    _    _          _
+)
