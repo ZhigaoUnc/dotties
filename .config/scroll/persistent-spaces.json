@@ -1,0 +1,198 @@
+{
+  "dingaling": {
+    "space": "dingaling",
+    "layout": {
+      "layout": "horizontal",
+      "children": [
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "emacs",
+              "command": "emacs"
+            },
+            {
+              "app_id": "obsidian",
+              "command": "obsidian"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "sioyek",
+              "command": "sioyek"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "nwg-displays",
+              "command": "nwg-displays"
+            }
+          ]
+        }
+      ]
+    },
+    "focused_app": "obsidian"
+  },
+  "test": {
+    "space": "test",
+    "layout": {
+      "layout": "horizontal",
+      "children": [
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "sioyek",
+              "command": "sioyek"
+            },
+            {
+              "app_id": "obsidian",
+              "command": "obsidian"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "emacs",
+              "command": "emacs"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "nwg-displays",
+              "command": "nwg-displays"
+            }
+          ]
+        }
+      ]
+    },
+    "focused_app": "emacs"
+  },
+  "riamustinyballs": {
+    "space": "riamustinyballs",
+    "layout": {
+      "layout": "horizontal",
+      "children": [
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "sioyek",
+              "command": "sioyek"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "obsidian",
+              "command": "obsidian"
+            },
+            {
+              "app_id": "emacs",
+              "command": "emacs"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "nwg-displays",
+              "command": "nwg-displays"
+            }
+          ]
+        }
+      ]
+    },
+    "focused_app": "emacs"
+  },
+  "bass": {
+    "space": "bass",
+    "layout": {
+      "layout": "horizontal",
+      "children": [
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "emacs",
+              "command": "emacs"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "sioyek",
+              "command": "sioyek"
+            },
+            {
+              "app_id": "obsidian",
+              "command": "obsidian"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "nwg-displays",
+              "command": "nwg-displays"
+            }
+          ]
+        }
+      ]
+    },
+    "focused_app": "obsidian"
+  },
+  "luli": {
+    "space": "luli",
+    "layout": {
+      "layout": "horizontal",
+      "children": [
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "kitty",
+              "command": "kitty"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "kitty",
+              "command": "kitty"
+            }
+          ]
+        },
+        {
+          "layout": "vertical",
+          "children": [
+            {
+              "app_id": "kitty",
+              "command": "kitty"
+            }
+          ]
+        }
+      ]
+    },
+    "focused_app": "kitty"
+  }
+}
