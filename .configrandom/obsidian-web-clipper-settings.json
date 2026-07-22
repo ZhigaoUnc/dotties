@@ -1,0 +1,284 @@
+{
+  "general_settings": {
+    "betaFeatures": false,
+    "legacyMode": true,
+    "openBehavior": "popup",
+    "saveBehavior": "addToObsidian",
+    "showMoreActionsButton": false,
+    "silentOpen": false
+  },
+  "highlighter_settings": {
+    "alwaysShowHighlights": true,
+    "highlightBehavior": "highlight-inline",
+    "highlighterEnabled": true
+  },
+  "interpreter_settings": {
+    "defaultPromptContext": "",
+    "interpreterAutoRun": false,
+    "interpreterEnabled": false,
+    "interpreterModel": "",
+    "models": [],
+    "providers": []
+  },
+  "migrationVersion": 1,
+  "property_types": [
+    {
+      "defaultValue": "{{title}}",
+      "name": "title",
+      "type": "text"
+    },
+    {
+      "defaultValue": "{{url}}",
+      "name": "source",
+      "type": "text"
+    },
+    {
+      "defaultValue": "{{author|split:\", \"|wikilink|join}}",
+      "name": "author",
+      "type": "multitext"
+    },
+    {
+      "defaultValue": "{{published}}",
+      "name": "published",
+      "type": "date"
+    },
+    {
+      "defaultValue": "{{date}}",
+      "name": "created",
+      "type": "date"
+    },
+    {
+      "defaultValue": "{{description}}",
+      "name": "description",
+      "type": "text"
+    },
+    {
+      "defaultValue": "clippings",
+      "name": "tags",
+      "type": "multitext"
+    },
+    {
+      "name": "status",
+      "type": "text"
+    },
+    {
+      "name": "type ",
+      "type": "multitext"
+    },
+    {
+      "name": "related",
+      "type": "text"
+    },
+    {
+      "name": "watched",
+      "type": "checkbox"
+    },
+    {
+      "name": "processed",
+      "type": "checkbox"
+    },
+    {
+      "name": "image",
+      "type": "text"
+    }
+  ],
+  "reader_settings": {
+    "appearance": "auto",
+    "autoScroll": true,
+    "blendImages": true,
+    "colorLinks": false,
+    "customCss": "",
+    "darkTheme": "same",
+    "defaultFont": "",
+    "followLinks": true,
+    "fontSize": 16,
+    "fonts": [],
+    "highlightActiveLine": true,
+    "lightTheme": "default",
+    "lineHeight": 1.6,
+    "maxWidth": 38,
+    "pinPlayer": true
+  },
+  "stats": {
+    "addToObsidian": 14,
+    "copyToClipboard": 0,
+    "saveFile": 0,
+    "share": 0
+  },
+  "template_1778603875274mmnyh6k9s": {
+    "id": "1778603875274mmnyh6k9s",
+    "name": "Default",
+    "behavior": "create",
+    "noteNameFormat": "{{title}}",
+    "path": "100 Inbox/Clippings",
+    "noteContentFormat": "{{content}}",
+    "context": "",
+    "properties": [
+      {
+        "id": "1778603875274zik7k0vom",
+        "name": "title",
+        "value": "{{title}}",
+        "type": "text"
+      },
+      {
+        "id": "17786038752744bmkc5yuo",
+        "name": "source",
+        "value": "{{url}}",
+        "type": "text"
+      },
+      {
+        "id": "1778603875274ykrn1tzzq",
+        "name": "author",
+        "value": "{{author|split:\\\", \\\"|wikilink|join}}",
+        "type": "multitext"
+      },
+      {
+        "id": "1778603875274z77n8gt3o",
+        "name": "published",
+        "value": "{{published}}",
+        "type": "date"
+      },
+      {
+        "id": "1778603875274xtnbg4vkr",
+        "name": "created",
+        "value": "{{date}}",
+        "type": "date"
+      },
+      {
+        "id": "17786038752746hyf40hqv",
+        "name": "description",
+        "value": "{{description}}",
+        "type": "text"
+      },
+      {
+        "id": "17786038752747svaxn4bf",
+        "name": "tags",
+        "value": "clippings",
+        "type": "multitext"
+      },
+      {
+        "id": "1778603941179da9icx37v",
+        "name": "status",
+        "value": "",
+        "type": "text"
+      }
+    ],
+    "triggers": [],
+    "vault": "ZaWaruto"
+  },
+  "template_1778606547598lfeui69uw": {
+    "id": "1778606547598lfeui69uw",
+    "name": "Videos",
+    "behavior": "create",
+    "noteNameFormat": "{{title}}",
+    "path": "/000 Inbox/Clippings",
+    "noteContentFormat": "{{content}}",
+    "properties": [],
+    "triggers": [
+      "https://www.youtube.com/watch?"
+    ],
+    "context": "",
+    "vault": "ZaWaruto"
+  },
+  "template_17786069682937fky3i58g": {
+    "id": "17786069682937fky3i58g",
+    "name": "Video",
+    "behavior": "create",
+    "noteNameFormat": "{{title}}",
+    "path": "100 Inbox/Videos",
+    "noteContentFormat": "![]( {{url}})\n\n## Transcript\n{{transcript}}\n",
+    "context": "",
+    "properties": [
+      {
+        "id": "1778603875274zik7k0vom",
+        "name": "title",
+        "value": "{{title}}",
+        "type": "text"
+      },
+      {
+        "id": "1778603875274xtnbg4vkr",
+        "name": "created",
+        "value": "{{date}}",
+        "type": "date"
+      },
+      {
+        "id": "17786038752744bmkc5yuo",
+        "name": "source",
+        "value": "{{url}}",
+        "type": "text"
+      },
+      {
+        "id": "1778603875274ykrn1tzzq",
+        "name": "author",
+        "value": "{{author|split:\\\", \\\"|wikilink|join}}",
+        "type": "multitext"
+      },
+      {
+        "id": "1778603875274z77n8gt3o",
+        "name": "published",
+        "value": "{{published}}",
+        "type": "date"
+      },
+      {
+        "id": "17786038752746hyf40hqv",
+        "name": "description",
+        "value": "{{description}}",
+        "type": "text"
+      },
+      {
+        "id": "17786038752747svaxn4bf",
+        "name": "tags",
+        "value": "",
+        "type": "multitext"
+      },
+      {
+        "id": "1778607022121ghj4netwh",
+        "name": "type ",
+        "value": "video",
+        "type": "multitext"
+      },
+      {
+        "id": "17786070310857qxtz322m",
+        "name": "related",
+        "value": "",
+        "type": "text"
+      },
+      {
+        "id": "1778607089926ts7ntmkad",
+        "name": "image",
+        "value": "https://img.youtube.com/vi/{{url|replace:\\\"https://www.youtube.com/watch?v=\\\":\\\"\\\"|replace:\\\"https://youtu.be/\\\":\\\"\\\"|split:\\\"&\\\"|first}}/hqdefault.jpg",
+        "type": "text"
+      },
+      {
+        "id": "1778603941179da9icx37v",
+        "name": "status",
+        "value": "open",
+        "type": "text"
+      },
+      {
+        "id": "17786103935696pr4y110c",
+        "name": "watched",
+        "value": "",
+        "type": "checkbox"
+      },
+      {
+        "id": "1778610408386wmh6swx28",
+        "name": "processed",
+        "value": "",
+        "type": "checkbox"
+      }
+    ],
+    "triggers": [
+      "https://www.youtube.com/watch?"
+    ],
+    "vault": "ZaWaruto"
+  },
+  "template_list": [
+    "17786069682937fky3i58g",
+    "1778606547598lfeui69uw",
+    "1778603875274mmnyh6k9s"
+  ],
+  "vaults": [
+    "ZaWaruto"
+  ]
+}

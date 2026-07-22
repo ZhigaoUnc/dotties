@@ -1,0 +1,14 @@
+/**
+ *
+ * Theme : AMOLED Black Muted
+ * Matches : Absolute black with desaturated accents
+ * **/
+
+* {
+    background:     #000000FF;
+    background-alt: #000000FF;
+    foreground:     #FFFFFFFF;
+    selected:       #B3B3B3FF;
+    active:         #468C46FF;
+    urgent:         #8C4646FF;
+}
