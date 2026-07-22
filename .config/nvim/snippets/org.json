@@ -1,0 +1,69 @@
+{
+  "org-todo": {
+    "prefix": "todo",
+    "body": ["* TODO ${1:task description}"],
+    "description": "TODO headline"
+  },
+  "org-scheduled": {
+    "prefix": "sched",
+    "body": ["  SCHEDULED: <${1:date}>"],
+    "description": "SCHEDULED timestamp"
+  },
+  "org-deadline": {
+    "prefix": "dead",
+    "body": ["  DEADLINE: <${1:date}>"],
+    "description": "DEADLINE timestamp"
+  },
+  "org-properties": {
+    "prefix": "props",
+    "body": ["  :PROPERTIES:", "  :END:"],
+    "description": "Properties drawer"
+  },
+  "org-task": {
+    "prefix": "task",
+    "body": [
+      "* TODO ${1:task description}",
+      "  SCHEDULED: <${2:date}>",
+      "  :PROPERTIES:",
+      "  :END:"
+    ],
+    "description": "Full org task with SCHEDULED"
+  },
+  "org-done": {
+    "prefix": "done",
+    "body": ["* DONE ${1:task description}"],
+    "description": "DONE headline"
+  },
+  "org-note": {
+    "prefix": "note",
+    "body": ["* NOTE ${1:note}"],
+    "description": "NOTE headline"
+  },
+  "org-gcal-task": {
+    "prefix": "gcal",
+    "body": [
+      "* TODO ${1:task description}",
+      "  SCHEDULED: <${2:date}>",
+      "  :PROPERTIES:",
+      "  :GCAL_ID: ",
+      "  :CALENDAR_ID: primary",
+      "  :END:"
+    ],
+    "description": "Org task with GCal properties"
+  },
+  "org-closed": {
+    "prefix": "closed",
+    "body": ["  CLOSED: [$1]"],
+    "description": "CLOSED timestamp"
+  },
+  "org-heading2": {
+    "prefix": "h2",
+    "body": ["** ${1:heading}"],
+    "description": "Level-2 heading"
+  },
+  "org-heading3": {
+    "prefix": "h3",
+    "body": ["*** ${1:heading}"],
+    "description": "Level-3 heading"
+  }
+}
