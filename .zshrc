@@ -40,12 +40,12 @@ export PATH="$HOME/.config/scripts:$PATH"
 export QT_QPA_PLATFORMTHEME=qt6ct
 export PATH="/home/unc/.bun/bin:$PATH"
 
-# my keys (should be backed up somewhere)
+# my keys are in .zshrc.local (should be backed up somewhere)
 # 1. TOGGL api key
 # 2. GCAL_ORG_SYNC_CLIENT_ID=
 # 3. GCAL_ORG_SYNC_CLIENT_SECRET
 # 4. TOGGL_API_TOKEN
-# 5. export FIREBASE_URL="https://activitywatch-dcebb-default-rtdb.asia-southeast1.firebasedatabase.app"
+# 5. export FIREBASE_URL=
 # 6. MY_KEY="rediah"
 
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
