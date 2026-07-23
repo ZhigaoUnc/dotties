@@ -1,0 +1,74 @@
+#!/bin/sh
+# screenshot - Wayland screenshot + annotation overlay (Quickshell).
+# Launches the overlay on the current output set. Bind this command to a key
+# in your compositor config (see README). Region mode also lets you click a
+# single window to grab it.
+
+set -eu
+
+usage() {
+	cat <<'EOF'
+screenshot - capture + annotate
+
+usage: screenshot [mode]
+
+modes:
+  (none), region   drag a region, or click a window to grab it (default)
+  monitor          click a monitor to grab the whole output
+
+options:
+  -h, --help       show this help
+
+env:
+  SCREENSHOT_CONFIG_DIR  override the Quickshell config dir (must hold shell.qml)
+  SCREENSHOT_SAVEDIR     override the auto-save directory
+  SCREENSHOT_KEYBIND_FILE  write the in-app rebind here instead of autodetecting
+EOF
+}
+
+mode=region
+case "${1:-}" in
+	monitor | --monitor | -m) mode=monitor ;;
+	region | --region | -r | "") mode=region ;;
+	-h | --help) usage; exit 0 ;;
+	*) printf 'screenshot: unknown argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+esac
+
+dir="${SCREENSHOT_CONFIG_DIR:-}"
+if [ -z "$dir" ]; then
+	self=$(dirname "$(readlink -f "$0")")
+	# The src/ beside this launcher comes first so a checkout or a freshly pulled
+	# copy always runs its own code instead of a stale shared install; the install
+	# paths are only a fallback. A normal install resolves $self/../src to the same
+	# place, so this changes nothing there.
+	for c in \
+		"$self/screenshot" \
+		"${HOME:-}/.config/scripts/screenshot" \
+		"${HOME:-}/.local/share/screenshot/src" \
+		/usr/share/screenshot/src \
+		/usr/lib/screenshot/src; do
+		if [ -f "$c/shell.qml" ]; then dir="$c"; break; fi
+	done
+fi
+
+if [ -z "$dir" ] || [ ! -f "$dir/shell.qml" ]; then
+	echo "screenshot: could not locate the config dir (set SCREENSHOT_CONFIG_DIR)" >&2
+	exit 1
+fi
+
+command -v qs >/dev/null 2>&1 || {
+	echo "screenshot: 'qs' (quickshell) not found in PATH" >&2
+	exit 1
+}
+
+# Single instance: a second press while the overlay is up is a no-op. The lock
+# is held on fd 9 for the lifetime of qs; clipboard daemons that qs spawns close
+# fd 9 (see shell.qml) so a backgrounded wl-copy cannot pin the lock after exit.
+# Keep the lock in a user-owned dir: XDG_RUNTIME_DIR is per-user 0700, and the
+# ~/.cache fallback avoids the world-writable /tmp symlink-follow on shared boxes.
+rundir="${XDG_RUNTIME_DIR:-$HOME/.cache}"
+mkdir -p "$rundir" 2>/dev/null || rundir="/tmp"
+lock="$rundir/screenshot.lock"
+exec 9>"$lock"
+flock -n 9 || { echo "screenshot: already running" >&2; exit 0; }
+exec env SCREENSHOT_MODE="$mode" qs -p "$dir"
