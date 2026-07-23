@@ -26,6 +26,10 @@
       "client_side_decorations": {
          "enabled": false,
          "border_width": 1
+      },
+      "layer_shell": {
+         "enabled": true,
+         "layer": "overlay"
       }
    },
    "providers": {
