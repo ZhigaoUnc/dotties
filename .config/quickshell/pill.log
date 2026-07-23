@@ -1,0 +1,35 @@
+[33m  WARN[0m: [31mQuickshell was built against Qt 6.11.0 but the system has updated to Qt 6.11.1 without rebuilding the package. This is likely to cause crashes, so the quickshell package must be rebuilt.
+
+[32m  INFO[0m: Launching config: "/home/unc/.config/quickshell/pill/shell.qml"
+[32m  INFO[0m: Shell ID: "838101008d53fabeb476e2cfef9b98a2" Path ID "838101008d53fabeb476e2cfef9b98a2"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/2wc21ucaht/log.qslog"
+[33m  WARN[97m qt.qml.propertyCache.append[0m: Member data of the object ClippingRectangle_QMLTYPE_91 overrides a member of the base object. Consider renaming it or adding final or override specifier
+[33m  WARN[97m quickshell.dbus.objectmanager[0m: Failed to create DBusObjectManagerInterface for "org.bluez" "/" : QDBusError("", "")
+[33m  WARN[97m scene[0m: QML Binding at @shell.qml[73:5]: Property 'dnd' does not exist on Notifs.
+[33m  WARN[97m scene[0m: @Tray.qml[306:21]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Mixer.qml[400:17]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Mixer.qml[400:17]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[97m scene[0m: @DisplayPicker.qml[119:13]: Unable to assign [undefined] to QColor
+[32m  INFO[0m: Configuration Loaded
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("ddcutil", "detect", "--brief")
+[33m  WARN[97m scene[0m: @Tooltip.qml[77:13]: Unable to assign [undefined] to QColor
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: Process failed to start, likely because the binary could not be found. Command: QList("cliphist", "list")
+[33m  WARN[0m: The Wayland connection broke. Did the Wayland compositor die?
