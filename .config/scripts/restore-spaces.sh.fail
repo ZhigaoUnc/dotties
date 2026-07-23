@@ -1,0 +1,106 @@
+#!/bin/bash
+
+SOCK="${SWAYSOCK}"
+[ -z "$SOCK" ] || [ ! -S "$SOCK" ] && SOCK=$(ls -t /run/user/1000/scroll-ipc.*.sock 2>/dev/null | head -1)
+[ -z "$SOCK" ] && exit 0
+
+JSON_FILE="$HOME/.config/scroll/persistent-spaces.json"
+SCROLLMSG=(scrollmsg -s "$SOCK")
+
+[ ! -f "$JSON_FILE" ] && exit 0
+
+launch_leaf() {
+  local app_id="$1"
+  local cmd="${2:-$app_id}"
+  local before after
+  before=$("${SCROLLMSG[@]}" -t get_tree | jq --arg app "$app_id" '[.. | select(type == "object" and .app_id? == $app)] | length')
+
+  "${SCROLLMSG[@]}" "exec" "$cmd"
+
+  local tries=0
+  while [ $tries -lt 30 ]; do
+    after=$("${SCROLLMSG[@]}" -t get_tree | jq --arg app "$app_id" '[.. | select(type == "object" and .app_id? == $app)] | length')
+    [ "$after" -gt "$before" ] && break
+    sleep 0.3
+    tries=$((tries + 1))
+  done
+  if [ $tries -ge 30 ]; then
+    echo "Warning: $app_id launch timed out after 9s" >&2
+  fi
+}
+
+_restore_tree() {
+  local node="$1"
+  local type
+  type=$(echo "$node" | jq -r 'type')
+
+  if [ "$type" = "string" ]; then
+    launch_leaf "$(echo "$node" | jq -r '.')"
+    return
+  fi
+
+  if [ "$type" = "object" ] && echo "$node" | jq -e '.app_id and (.children | not)' &>/dev/null; then
+    launch_leaf "$(echo "$node" | jq -r '.app_id')" "$(echo "$node" | jq -r '.command // .app_id')"
+    return
+  fi
+
+  local layout count
+  layout=$(echo "$node" | jq -r '.layout // ""')
+  count=$(echo "$node" | jq '.children | length')
+  [ "$count" = "0" ] && return
+
+  local mode
+  case "$layout" in
+    h|horizontal|splith) mode="h" ;;
+    v|vertical|splitv) mode="v" ;;
+    *) mode="" ;;
+  esac
+
+  local i=0
+  while [ $i -lt $count ]; do
+    local child
+    child=$(echo "$node" | jq -c ".children[$i]")
+
+    if [ -n "$mode" ]; then
+      "${SCROLLMSG[@]}" "set_mode" "$mode"
+    fi
+
+    _restore_tree "$child"
+
+    i=$((i + 1))
+  done
+}
+
+ws=1
+for label in $(jq -r 'to_entries[] | .key' "$JSON_FILE"); do
+  "${SCROLLMSG[@]}" "workspace" "$ws"
+  sleep 0.2
+  node=$(jq -c ".[\"$label\"].layout" "$JSON_FILE" 2>/dev/null)
+  if [ -n "$node" ] && [ "$node" != "null" ]; then
+    # Stash existing layout apps from this workspace to scratchpad
+    while IFS= read -r app_id; do
+      [ -z "$app_id" ] && continue
+      "${SCROLLMSG[@]}" "[app_id=\"$app_id\" workspace=\"__focused__\"] move scratchpad" 2>/dev/null
+    done <<< "$(echo "$node" | jq -r '[.. | select(type == "object" and .app_id) | .app_id] | unique | .[]')"
+
+    mode=""
+    case "$(echo "$node" | jq -r '.layout // ""')" in
+      h|horizontal|splith) mode="h" ;;
+      v|vertical|splitv) mode="v" ;;
+      *) mode="" ;;
+    esac
+    if [ -n "$mode" ]; then
+      "${SCROLLMSG[@]}" "set_mode" "$mode"
+    fi
+
+    _restore_tree "$node"
+
+    sleep 1
+  fi
+  "${SCROLLMSG[@]}" "space save" "\"$label\""
+  focused=$(jq -r ".[\"$label\"].focused_app // \"\"" "$JSON_FILE" 2>/dev/null)
+  if [ -n "$focused" ]; then
+    "${SCROLLMSG[@]}" "[app_id=\"$focused\"] focus" 2>/dev/null
+  fi
+  ws=$((ws + 1))
+done

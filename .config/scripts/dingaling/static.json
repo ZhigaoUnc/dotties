@@ -1,0 +1,19 @@
+{
+  "surface": "#000000",
+  "surface_container": "#0a0a0a",
+  "surface_container_low": "#060606",
+  "surface_container_high": "#151515",
+  "surface_container_highest": "#222222",
+  "primary": "#ffffff",
+  "primary_container": "#333333",
+  "on_primary_container": "#ffffff",
+  "outline": "#444444",
+  "outline_variant": "#333333",
+  "cream": "#d4d4d4",
+  "bright": "#ffffff",
+  "subtle": "#bbbbbb",
+  "dim": "#888888",
+  "faint": "#bbbbbb",
+  "icon_dim": "#999999",
+  "tick_rest": "#888888"
+}

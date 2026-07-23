@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+export QS_THEME="dingaling"
+export QML_XHR_ALLOW_FILE_READ=1
+exec ~/Projects/qylock/qylock/quickshell-lockscreen/lock.sh

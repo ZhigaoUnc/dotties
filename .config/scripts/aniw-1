@@ -1,0 +1,601 @@
+#!/bin/sh
+# ani-watch — ani-cli wrapper that syncs watched episodes to AniList
+# Usage: ani-watch [any ani-cli args...]
+#
+# First-time setup:  ani-watch --auth
+# Token stored at:   ~/.config/ani-watch/config
+#
+# Features:
+#   - Syncs progress to AniList after each episode
+#   - Only marks watched if >=85% of episode was played
+#   - Auto-sets status to COMPLETED when last episode is watched
+#   - Detects rewatches and sets status to REPEATING
+#   - Prompts for a score after completing a show (via rofi)
+#   - Warns via notify-send if AniList progress is ahead of what you're playing
+#   - Prompts user to confirm AniList match on first encounter via rofi (cached after)
+#
+# Dependencies: rofi, notify-send (libnotify), python3, ffprobe
+# Optional:     zenity (fallback if rofi is unavailable)
+
+# ── Config ────────────────────────────────────────────────────────────────────
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ani-watch"
+CONFIG_FILE="$CONFIG_DIR/config"
+CACHE_FILE="$CONFIG_DIR/id_cache.json"
+MPV_IPC_SOCKET="/tmp/ani-watch-mpv.sock"
+# Minimum percentage of episode that must be played to count as watched
+WATCH_THRESHOLD="${ANI_WATCH_THRESHOLD:-85}"
+
+mkdir -p "$CONFIG_DIR"
+[ -f "$CACHE_FILE" ] || printf '{}' >"$CACHE_FILE"
+[ -f "$CONFIG_FILE" ] && . "$CONFIG_FILE"
+ANILIST_TOKEN="${ANILIST_TOKEN:-}"
+
+# ── Auth setup ────────────────────────────────────────────────────────────────
+if [ "${1:-}" = "--auth" ]; then
+  cat <<'EOF'
+To get your AniList token:
+  1. Go to https://anilist.co/settings/developer
+     Create a client — set Redirect URI to: https://anilist.co/api/v2/oauth/pin
+  2. Visit (replace CLIENT_ID with your actual numeric client id):
+     https://anilist.co/api/v2/oauth/authorize?client_id=CLIENT_ID&response_type=token
+  3. After authorizing, copy the token from the URL bar (the long string after #access_token=)
+EOF
+  printf 'Paste token here: '
+  read -r _token
+  printf 'ANILIST_TOKEN="%s"\n' "$_token" >"$CONFIG_FILE"
+  chmod 600 "$CONFIG_FILE"
+  printf 'Saved to %s\n' "$CONFIG_FILE"
+  exit 0
+fi
+
+if [ "${1:-}" = "--clear-cache" ]; then
+  rm -f "$CACHE_FILE"
+  printf '{}' >"$CACHE_FILE"
+  printf '[ani-watch] Cache cleared\n'
+  exit 0
+fi
+
+# ── GUI helpers ───────────────────────────────────────────────────────────────
+
+# _notify SUMMARY BODY [urgency: low|normal|critical]
+# Sends a desktop notification. Silent no-op if notify-send is absent.
+_notify() {
+  _n_summary="$1"
+  _n_body="$2"
+  _n_urgency="${3:-normal}"
+  command -v notify-send >/dev/null || return 0
+  notify-send -u "$_n_urgency" -a "ani-watch" "$_n_summary" "$_n_body"
+}
+
+# _rofi_pick PROMPT
+# Reads newline-separated lines from stdin, shows them in rofi/zenity,
+# returns the selected line. Returns 1 if nothing selected or cancelled.
+# Caller must pipe lines in — never pass as args (spaces would word-split).
+_rofi_pick() {
+  _rp_prompt="$1"
+  _rp_input=$(cat -) # read all stdin before opening the GUI
+  if command -v rofi >/dev/null 2>&1; then
+    _rp_choice=$(printf '%s\n' "$_rp_input" |
+      rofi -dmenu -i -p "$_rp_prompt" -theme-str 'window {width: 800px;}')
+  elif command -v zenity >/dev/null 2>&1; then
+    _rp_choice=$(printf '%s\n' "$_rp_input" |
+      zenity --list --column="Select" --title="ani-watch: $_rp_prompt" \
+        --width=700 --height=400 2>/dev/null)
+  else
+    printf '[ani-watch] rofi/zenity not found — cannot show picker\n' >&2
+    return 1
+  fi
+  [ -z "$_rp_choice" ] && return 1
+  printf '%s' "$_rp_choice"
+}
+
+# _rofi_input PROMPT [DEFAULT]
+# Shows a rofi text input box, returns what the user typed.
+# Falls back to zenity. Returns 1 if cancelled.
+_rofi_input() {
+  _ri_prompt="$1"
+  _ri_default="${2:-}"
+  if command -v rofi >/dev/null 2>&1; then
+    _ri_result=$(printf '%s' "$_ri_default" |
+      rofi -dmenu -p "$_ri_prompt" -theme-str 'window {width: 400px;}')
+  elif command -v zenity >/dev/null 2>&1; then
+    _ri_result=$(zenity --entry --title="ani-watch" \
+      --text="$_ri_prompt" --entry-text="$_ri_default" 2>/dev/null)
+  else
+    printf '[ani-watch] rofi/zenity not found — skipping input prompt\n' >&2
+    return 1
+  fi
+  [ -z "$_ri_result" ] && return 1
+  printf '%s' "$_ri_result"
+}
+
+# ── AniList API ───────────────────────────────────────────────────────────────
+
+_al_request() {
+  python3 - "$1" "$2" "$ANILIST_TOKEN" <<'PYEOF'
+import sys, json, urllib.request, urllib.error
+query, variables, token = sys.argv[1], sys.argv[2], sys.argv[3]
+payload = json.dumps({"query": query, "variables": json.loads(variables)}).encode()
+req = urllib.request.Request(
+    "https://graphql.anilist.co",
+    data=payload,
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token,
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+        "Accept": "application/json",
+        "Origin": "https://anilist.co",
+        "Referer": "https://anilist.co/"
+    }
+)
+try:
+    with urllib.request.urlopen(req, timeout=10) as r:
+        print(r.read().decode())
+except urllib.error.HTTPError as e:
+    print(json.dumps({"errors": [{"message": e.read().decode()}]}))
+except Exception as e:
+    print(json.dumps({"errors": [{"message": str(e)}]}))
+PYEOF
+}
+
+# Search AniList and return up to 8 candidates
+_al_search_media() {
+  _vars=$(python3 -c "import json,sys; print(json.dumps({'t': sys.argv[1]}))" "$1")
+  _al_request \
+    'query ($t: String) {
+            Page(page: 1, perPage: 8) {
+                media(search: $t, type: ANIME) {
+                    id
+                    episodes
+                    title { romaji english }
+                    mediaListEntry {
+                        progress
+                        status
+                        repeat
+                        score
+                    }
+                }
+            }
+        }' "$_vars"
+}
+
+# Fetch list entry + episode count for a known AniList media ID
+_fetch_list_entry_by_id() {
+  _vars=$(python3 -c "import json,sys; print(json.dumps({'id': int(sys.argv[1])}))" "$1")
+  _result=$(_al_request \
+    'query ($id: Int) {
+            Media(id: $id) {
+                id
+                episodes
+                mediaListEntry {
+                    progress
+                    status
+                    repeat
+                    score
+                }
+            }
+        }' "$_vars")
+
+  eval "$(printf '%s' "$_result" | python3 -c "
+import json, sys
+try:
+    m = json.load(sys.stdin)['data']['Media']
+    le = m.get('mediaListEntry') or {}
+    print('_MI_LIST_PROGRESS=' + str(le.get('progress', 0) or 0))
+    print('_MI_LIST_STATUS='   + str(le.get('status', '')  or ''))
+    print('_MI_LIST_REPEAT='   + str(le.get('repeat', 0)   or 0))
+    print('_MI_LIST_SCORE='    + str(le.get('score', 0)    or 0))
+    print('_MI_EPISODES='      + str(m.get('episodes') or ''))
+except Exception as e:
+    print('_MI_LIST_PROGRESS=0')
+    print('_MI_LIST_STATUS=')
+    print('_MI_LIST_REPEAT=0')
+    print('_MI_LIST_SCORE=0')
+" 2>/dev/null)"
+}
+
+# ── Cache ─────────────────────────────────────────────────────────────────────
+
+_cache_get() {
+  python3 -c "
+import json, sys
+try:
+    data = json.load(open('$CACHE_FILE'))
+    print(data.get(sys.argv[1], ''))
+except Exception:
+    print('')
+" "$1" 2>/dev/null
+}
+
+_cache_set() {
+  python3 - "$1" "$2" "$CACHE_FILE" <<'PYEOF'
+import json, sys
+key, val, path = sys.argv[1], sys.argv[2], sys.argv[3]
+try:
+    data = json.load(open(path))
+except Exception:
+    data = {}
+data[key] = val
+json.dump(data, open(path, 'w'), indent=2)
+PYEOF
+}
+
+# ── Media info fetch with rofi match picker ───────────────────────────────────
+_fetch_media_info() {
+  _fmt_title="$1"
+  _key=$(printf '%s' "$_fmt_title" | tr '[:upper:]' '[:lower:]')
+  _cached=$(_cache_get "$_key")
+
+  if [ -n "$_cached" ]; then
+    _MI_ID=$(printf '%s' "$_cached" | cut -d'|' -f1)
+    _MI_EPISODES=$(printf '%s' "$_cached" | cut -d'|' -f2)
+    _fetch_list_entry_by_id "$_MI_ID"
+    
+    if [ "$_MI_LIST_STATUS" = "COMPLETED" ]; then
+      printf '\n\033[1;34m[ani-watch]\033[0m "%s" is already COMPLETED on AniList — confirm rewatch entry:\n' "$_fmt_title" >&2
+      _rewatch_confirm=$(_fetch_list_entry_by_id "$_MI_ID" && printf 'yes')
+      
+      _search_query="$_fmt_title"
+      while true; do
+        _search_result=$(_al_search_media "$_search_query")
+        _candidates=$(printf '%s' "$_search_result" | python3 -c "
+import json, sys
+try:
+    media_list = json.load(sys.stdin)['data']['Page']['media']
+    for i, m in enumerate(media_list):
+        mid   = m['id']
+        eps   = m.get('episodes') or '?'
+        title = m['title'].get('english') or m['title'].get('romaji') or ''
+        print(str(i+1) + '\t' + str(mid) + '\t' + str(eps) + '\t' + title)
+except Exception:
+    pass
+" 2>/dev/null)
+
+        _rofi_lines=""
+        if [ -n "$_candidates" ]; then
+          _rofi_lines=$(printf '%s' "$_candidates" | awk -F'\t' '{
+                  printf "%s (%s eps) [id:%s]\n", $4, $3, $2
+              }')
+        fi
+
+        _skip_line="Skip — don't track this rewatch"
+        _search_line="🔍 Search another title..."
+        
+        _chosen_line=$({
+          printf '%s\n' "$_skip_line"
+          printf '%s\n' "$_search_line"
+          [ -n "$_rofi_lines" ] && printf '%s\n' "$_rofi_lines"
+        } | _rofi_pick "Rewatch entry for: $_fmt_title")
+
+        [ $? -ne 0 ] && break
+        [ "$_chosen_line" = "$_skip_line" ] && break
+        [ -z "$_chosen_line" ] && break
+
+        if [ "$_chosen_line" = "$_search_line" ]; then
+          _user_query=$(_rofi_input "Enter custom search term:" "$_search_query")
+          if [ $? -eq 0 ] && [ -n "$_user_query" ]; then
+            _search_query="$_user_query"
+            continue
+          fi
+          continue
+        fi
+
+        _chosen=$(printf '%s' "$_candidates" | awk -F'\t' -v chosen="$_chosen_line" '{
+                      display = $4 " (" $3 " eps) [id:" $2 "]"
+                      if (display == chosen) print $0
+                  }')
+        if [ -n "$_chosen" ]; then
+          _MI_ID=$(printf '%s' "$_chosen" | cut -f2)
+          _MI_EPISODES=$(printf '%s' "$_chosen" | cut -f3)
+          [ "$_MI_EPISODES" = "?" ] && _MI_EPISODES=""
+          _cache_set "$_key" "${_MI_ID}|${_MI_EPISODES}"
+          _fetch_list_entry_by_id "$_MI_ID"
+          break
+        fi
+      done
+    fi
+    return 0
+  fi
+
+  # No cache — search AniList
+  _search_query="$_fmt_title"
+  while true; do
+    printf '\n\033[1;34m[ani-watch]\033[0m Searching AniList for "%s"...\n' "$_search_query" >&2
+    _search_result=$(_al_search_media "$_search_query")
+
+    _candidates=$(printf '%s' "$_search_result" | python3 -c "
+import json, sys
+try:
+    media_list = json.load(sys.stdin)['data']['Page']['media']
+    for i, m in enumerate(media_list):
+        mid   = m['id']
+        eps   = m.get('episodes') or '?'
+        title = m['title'].get('english') or m['title'].get('romaji') or ''
+        print(str(i+1) + '\t' + str(mid) + '\t' + str(eps) + '\t' + title)
+except Exception:
+    pass
+" 2>/dev/null)
+
+    _rofi_lines=""
+    if [ -n "$_candidates" ]; then
+      _rofi_lines=$(printf '%s' "$_candidates" | awk -F'\t' '{
+          printf "%s (%s eps) [id:%s]\n", $4, $3, $2
+      }')
+    fi
+
+    _skip_line="Skip — don't track this show"
+    _search_line="🔍 Search another title..."
+    
+    _chosen_line=$({
+      printf '%s\n' "$_skip_line"
+      printf '%s\n' "$_search_line"
+      [ -n "$_rofi_lines" ] && printf '%s\n' "$_rofi_lines"
+    } | _rofi_pick "Match AniList entry for: $_fmt_title")
+
+    if [ $? -ne 0 ]; then
+      printf '\033[1;33m[ani-watch]\033[0m Picker cancelled — skipping sync\n' >&2
+      return 1
+    fi
+
+    if [ "$_chosen_line" = "$_skip_line" ]; then
+      printf '\033[1;33m[ani-watch]\033[0m Skipping AniList tracking for "%s"\n' "$_fmt_title" >&2
+      return 1
+    fi
+
+    if [ "$_chosen_line" = "$_search_line" ]; then
+      _user_query=$(_rofi_input "Enter custom search term:" "$_search_query")
+      if [ $? -eq 0 ] && [ -n "$_user_query" ]; then
+        _search_query="$_user_query"
+        continue
+      fi
+      continue
+    fi
+
+    _chosen=$(printf '%s' "$_candidates" | awk -F'\t' -v chosen="$_chosen_line" '{
+          display = $4 " (" $3 " eps) [id:" $2 "]"
+          if (display == chosen) print $0
+      }')
+
+    if [ -z "$_chosen" ]; then
+      printf '\033[1;31m[ani-watch]\033[0m Could not match selection — trying again\n' >&2
+      continue
+    fi
+
+    _MI_ID=$(printf '%s' "$_chosen" | cut -f2)
+    _MI_EPISODES=$(printf '%s' "$_chosen" | cut -f3)
+    _chosen_title=$(printf '%s' "$_chosen" | cut -f4)
+    [ "$_MI_EPISODES" = "?" ] && _MI_EPISODES=""
+
+    _cache_set "$_key" "${_MI_ID}|${_MI_EPISODES}"
+    printf '\033[1;32m[ani-watch]\033[0m Matched to: %s — cached for future episodes\n' "$_chosen_title" >&2
+    _notify "ani-watch" "Tracking: $_chosen_title" "low"
+
+    _fetch_list_entry_by_id "$_MI_ID"
+    return $?
+  done
+}
+
+# ── Save entry ────────────────────────────────────────────────────────────────
+
+_al_save_entry() {
+  _save_id="$1"
+  _save_status="$2"
+  _save_progress="$3"
+  _save_repeat="${4:-}"
+  _save_score="${5:-}"
+
+  _vars=$(python3 -c "
+import json, sys
+v = {'id': int(sys.argv[1]), 'status': sys.argv[2], 'progress': int(float(sys.argv[3]))}
+if sys.argv[4]: v['repeat'] = int(sys.argv[4])
+if sys.argv[5]: v['score'] = float(sys.argv[5])
+print(json.dumps(v))
+" "$_save_id" "$_save_status" "$_save_progress" "$_save_repeat" "$_save_score")
+
+  _al_request \
+    'mutation ($id: Int, $status: MediaListStatus, $progress: Int, $repeat: Int, $score: Float) {
+            SaveMediaListEntry(mediaId: $id, status: $status, progress: $progress, repeat: $repeat, score: $score) {
+                progress status repeat score
+            }
+        }' "$_vars"
+}
+
+# ── mpv IPC: get playback percentage ─────────────────────────────────────────
+_mpv_get_percent() {
+  command -v socat >/dev/null 2>&1 || return 1
+  [ -S "$MPV_IPC_SOCKET" ] || return 1
+  _pct=$(printf '{"command":["get_property","percent-pos"]}\n' |
+    socat - "$MPV_IPC_SOCKET" 2>/dev/null |
+    python3 -c "import json,sys; d=json.load(sys.stdin); print(int(d.get('data',0)))" 2>/dev/null)
+  printf '%s' "$_pct"
+}
+
+# ── Score prompt via rofi ─────────────────────────────────────────────────────
+_prompt_score() {
+  _ps_title="$1"
+  _score_choice=$(printf 'Skip\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n' |
+    _rofi_pick "Score \"$_ps_title\" (1-10)")
+  [ $? -ne 0 ] && return # cancelled
+  [ "$_score_choice" = "Skip" ] && return
+  printf '%s' "$_score_choice" | grep -qE '^([1-9]|10)$' && printf '%s' "$_score_choice"
+}
+
+# ── Main sync logic ───────────────────────────────────────────────────────────
+anilist_sync() {
+  [ -z "$ANILIST_TOKEN" ] && return 0
+  _sync_title="$1"
+  _sync_ep="$2"
+  _sync_pct="$3"
+
+  [ -z "$_sync_title" ] || [ -z "$_sync_ep" ] && return 0
+  printf '%s' "$_sync_ep" | grep -qE '^[0-9]+(\.[0-9]+)?$' || return 0
+
+  # Check completion threshold if we have percentage data
+  if [ -n "$_sync_pct" ]; then
+    if [ "$_sync_pct" -lt "$WATCH_THRESHOLD" ] 2>/dev/null; then
+      printf '\n\033[1;33m[ani-watch]\033[0m Only watched %s%% of ep %s — not syncing (threshold: %s%%)\n' \
+        "$_sync_pct" "$_sync_ep" "$WATCH_THRESHOLD" >&2
+      _notify "ani-watch: not synced" \
+        "Only watched ${_sync_pct}% of ep ${_sync_ep} (threshold: ${WATCH_THRESHOLD}%)" "low"
+      return 0
+    fi
+  fi
+
+  printf '\n\033[1;34m[ani-watch]\033[0m Syncing "%s" ep %s...\n' "$_sync_title" "$_sync_ep" >&2
+
+  _fetch_media_info "$_sync_title" || {
+    printf '\033[1;31m[ani-watch]\033[0m Could not find "%s" on AniList\n' "$_sync_title" >&2
+    _notify "ani-watch: error" "Could not find \"$_sync_title\" on AniList" "critical"
+    return 1
+  }
+
+  _ep_int=$(python3 -c "print(int(float('$_sync_ep')))")
+  _new_status="CURRENT"
+  _new_repeat="$_MI_LIST_REPEAT"
+  _score_to_save=""
+  _was_repeating=0
+
+  # Rewatch detection
+  if [ "$_MI_LIST_STATUS" = "COMPLETED" ] && [ "$_ep_int" -le "$_MI_LIST_PROGRESS" ] 2>/dev/null; then
+    _new_status="REPEATING"
+    _new_repeat=$((_MI_LIST_REPEAT + 1))
+    _was_repeating=1
+    printf '\033[1;35m[ani-watch]\033[0m Rewatch detected (x%s)\n' "$_new_repeat" >&2
+    _notify "ani-watch: rewatch" "Rewatch #${_new_repeat} of $_sync_title" "low"
+  elif [ "$_MI_LIST_STATUS" = "REPEATING" ]; then
+    _new_status="REPEATING"
+    _was_repeating=1
+  fi
+
+  # Completion detection
+  if [ -n "$_MI_EPISODES" ] && [ "$_ep_int" -ge "$_MI_EPISODES" ] 2>/dev/null; then
+    _new_status="COMPLETED"
+    printf '\033[1;32m[ani-watch]\033[0m Series complete!\n' >&2
+    _notify "ani-watch: completed! 🎉" "$_sync_title" "normal"
+
+    # Score prompt via rofi — if unscored, or finishing a rewatch
+    if [ "$_MI_LIST_SCORE" = "0" ] || [ "$_was_repeating" = "1" ]; then
+      _score_to_save=$(_prompt_score "$_sync_title")
+    fi
+  fi
+
+  # Save to AniList
+  _result=$(_al_save_entry "$_MI_ID" "$_new_status" "$_ep_int" "$_new_repeat" "$_score_to_save")
+
+  _update_line=$(
+    printf '%s' "$_result" | python3 -c "
+import json, sys
+try:
+    e = json.load(sys.stdin)['data']['SaveMediaListEntry']
+    score_str = (' score=' + str(e['score'])) if e.get('score') else ''
+    print('Updated: progress=' + str(e['progress'])
+          + ' status=' + e['status']
+          + ' repeat=' + str(e['repeat'])
+          + score_str)
+except Exception:
+    print('API error: ' + sys.stdin.read())
+" 2>/dev/null <<EOF
+$_result
+EOF
+  )
+  printf '\033[1;32m[ani-watch]\033[0m %s\n' "$_update_line" >&2
+  _notify "ani-watch: synced" "$_sync_title  |  $_update_line" "low"
+}
+
+# ── Pre-play AniList check ────────────────────────────────────────────────────
+anilist_precheck() {
+  [ -z "$ANILIST_TOKEN" ] && return 0
+  _pc_title="$1"
+  _pc_ep="$2"
+
+  [ -z "$_pc_title" ] || [ -z "$_pc_ep" ] && return 0
+  printf '%s' "$_pc_ep" | grep -qE '^[0-9]+(\.[0-9]+)?$' || return 0
+
+  _fetch_media_info "$_pc_title" || return 0
+  _ep_int=$(python3 -c "print(int(float('$_pc_ep')))")
+
+  if [ -n "$_MI_LIST_PROGRESS" ] && [ "$_MI_LIST_PROGRESS" -gt 0 ] 2>/dev/null; then
+    _expected=$((_MI_LIST_PROGRESS + 1))
+    if [ "$_ep_int" -gt "$_expected" ] 2>/dev/null; then
+      printf '\033[1;33m[ani-watch]\033[0m Warning: AniList has you at ep %s, playing ep %s\n' \
+        "$_MI_LIST_PROGRESS" "$_pc_ep" >&2
+      _notify "ani-watch: skipping ahead?" \
+        "$_pc_title — AniList: ep ${_MI_LIST_PROGRESS}, playing ep ${_pc_ep}" "normal"
+    fi
+  fi
+}
+
+# ── nohup override — makes player run synchronously so we can wait on it ─────
+# (Kept original implementation intact)
+_AW_DONE_FILE=$(mktemp /tmp/ani-watch-done.XXXXXX)
+MPV_WATCH_LATER_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/mpv/watch_later"
+
+nohup() {
+  _aw_stream_url=""
+  case "$1" in
+  mpv* | *flatpak*)
+    set -- "$@" "--save-position-on-quit"
+    for _arg; do _aw_stream_url="$_arg"; done
+    ;;
+  esac
+
+  "$@"
+  _aw_exit=$?
+
+  _pct=""
+  if [ -n "$_aw_stream_url" ] && [ -d "$MPV_WATCH_LATER_DIR" ]; then
+    _wl_hash=$(python3 -c "
+import hashlib, sys
+print(hashlib.md5(sys.argv[1].encode()).hexdigest().upper())
+" "$_aw_stream_url" 2>/dev/null)
+    _wl_path="$MPV_WATCH_LATER_DIR/$_wl_hash"
+    if [ -f "$_wl_path" ]; then
+      _pos=$(grep '^start=' "$_wl_path" | cut -d= -f2)
+      if [ -n "$_pos" ] && command -v ffprobe >/dev/null 2>&1; then
+        _dur=$(ffprobe -v quiet -show_entries format=duration \
+          -of default=noprint_wrappers=1:nokey=1 \
+          "$_aw_stream_url" 2>/dev/null)
+        if [ -n "$_dur" ]; then
+          _pct=$(python3 -c "
+try:
+    pos=float('$_pos'); dur=float('$_dur')
+    print(int(pos/dur*100)) if dur>0 else print('')
+except: print('')
+" 2>/dev/null)
+        fi
+      fi
+      rm -f "$_wl_path"
+    fi
+  fi
+
+  printf '%s\t%s\t%s\n' "$allanime_title" "$ep_no" "$_pct" >>"$_AW_DONE_FILE"
+  return $_aw_exit
+}
+
+# ── Source ani-cli ────────────────────────────────────────────────────────────
+ANI_CLI_PATH=$(command -v ani-cli 2>/dev/null)
+[ -z "$ANI_CLI_PATH" ] && printf '[ani-watch] ani-cli not found in PATH\n' >&2 && exit 1
+
+ANI_FUNCTIONS=$(sed '/^# MAIN$/q' "$ANI_CLI_PATH" | head -n -1)
+ANI_MAIN=$(sed -n '/^# MAIN$/,$p' "$ANI_CLI_PATH")
+
+eval "$ANI_FUNCTIONS"
+
+_orig_body=$(printf '%s' "$ANI_FUNCTIONS" | sed -n '/^play_episode()/,/^}/p')
+eval "$(printf '%s' "$_orig_body" | sed '1s/^play_episode()/_orig_play_episode()/')"
+
+play_episode() {
+  anilist_precheck "$allanime_title" "$ep_no"
+  : >"$_AW_DONE_FILE"
+  _orig_play_episode "$@"
+  wait
+  if [ -s "$_AW_DONE_FILE" ]; then
+    _done_title=$(cut -f1 "$_AW_DONE_FILE")
+    _done_ep=$(cut -f2 "$_AW_DONE_FILE")
+    _done_pct=$(cut -f3 "$_AW_DONE_FILE")
+    anilist_sync "$_done_title" "$_done_ep" "$_done_pct"
+  fi
+}
+trap 'rm -f "$_AW_DONE_FILE"' EXIT INT TERM
+
+eval "$ANI_MAIN"
