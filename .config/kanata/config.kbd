@@ -63,6 +63,7 @@
   pwr      (layer-toggle power)
   nav_tap (tap-hold-press 200 200 (multi (on-release release-virtualkey alt) lalt) (multi (layer-toggle nav) (on-release release-virtualkey alt)))
   f13_stick (one-shot 2000 f13)
+	ctrl-space-stick (multi (one-shot 2000 lctl) spc)
   tg_game  (layer-switch gaming)
   tg_base  (layer-switch base)
   tg_qwer  (layer-switch qwerty)
@@ -125,7 +126,7 @@
   grv  f1   f2   f3   f4   f5   f6   f7    f8    f9 f10  f11  f12    @af4
   _    1    2    3    4    5    6    7    8    9    0    _    _    _
   @cap_mod @met @alt @ctl @sft  -    left down up  rght    C-bspc C-del   _
-  _    [    ]    \    /    grv  '    home    end    ;    /    _
+  _    [    ]    \    /    grv  '    home    end    ;    @ctrl-space-stick   _
   _    _            lalt      @met         _    _    
   _
   _    _    _
