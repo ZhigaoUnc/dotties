@@ -755,6 +755,7 @@ bindsym $mod+ctrl+m exec bash -l /home/unc/.config/scripts/mode-picker.sh
 bindsym $mod+w exec bash -l /home/unc/.config/scripts/wikt-lookup.sh
 bindsym $mod+d exec vicinae open
 bindsym $mod+u exec bash -l /home/unc/.config/scripts/rofi-symbol-launcher.sh
+bindsym $mod+v exec vicinae vicinae://launch/clipboard/history
 
 # This triggers only if you tap and release the Super key without hitting anything else
 #bindsym --release Super_L exec $menu
