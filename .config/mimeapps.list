@@ -1,0 +1,237 @@
+[Default Applications]
+
+# ── File Manager / Directories ──────────────────────────────
+inode/directory=nemo.desktop
+# inode/directory=org.kde.dolphin.desktop
+# inode/directory=thunar.desktop
+# inode/directory=pcmanfm.desktop
+
+# ── Terminal Emulators ──────────────────────────────────────
+# x-terminal-emulator=ghostty.desktop
+# x-terminal-emulator=kitty.desktop
+# x-terminal-emulator=foot.desktop
+# x-terminal-emulator=Alacritty.desktop
+# x-terminal-emulator=org.wezfurlong.wezterm.desktop
+
+# ── Web Browsers ────────────────────────────────────────────
+x-scheme-handler/http=vivaldi-stable.desktop
+x-scheme-handler/https=vivaldi-stable.desktop
+x-scheme-handler/about=vivaldi-stable.desktop
+x-scheme-handler/unknown=vivaldi-stable.desktop
+# x-scheme-handler/http=firefox.desktop
+# x-scheme-handler/http=brave-origin-beta.desktop
+# x-scheme-handler/http=userapp-Waterfox-KXNYR3.desktop
+text/html=vivaldi-stable.desktop
+# text/html=firefox.desktop
+# text/html=brave-origin-beta.desktop
+application/xhtml+xml=vivaldi-stable.desktop
+application/x-extension-htm=vivaldi-stable.desktop
+application/x-extension-html=vivaldi-stable.desktop
+application/x-extension-shtml=vivaldi-stable.desktop
+application/x-extension-xhtml=vivaldi-stable.desktop
+application/x-extension-xht=vivaldi-stable.desktop
+application/x-extension-xhtml+xml=vivaldi-stable.desktop
+
+# ── Email ───────────────────────────────────────────────────
+# x-scheme-handler/mailto=aerc.desktop
+# x-scheme-handler/mailto=thunderbird.desktop
+
+# ── PDF / Documents ─────────────────────────────────────────
+application/pdf=sioyek.desktop
+# application/pdf=org.pwmt.zathura-pdf-mupdf.desktop
+# application/pdf=org.gnome.Evince.desktop
+# application/pdf=firefox.desktop
+text/plain=nvim.desktop
+# text/plain=emacs.desktop
+# text/plain=code.desktop
+text/x-makefile=nvim.desktop
+text/x-c=nvim.desktop
+text/x-csrc=nvim.desktop
+text/x-chdr=nvim.desktop
+text/x-c++=nvim.desktop
+text/x-c++src=nvim.desktop
+text/x-c++hdr=nvim.desktop
+text/x-python=nvim.desktop
+text/x-java=nvim.desktop
+text/x-rust=nvim.desktop
+text/x-go=nvim.desktop
+text/x-shellscript=nvim.desktop
+text/x-script.sh=nvim.desktop
+text/x-script.zsh=nvim.desktop
+text/x-script.bash=nvim.desktop
+text/css=nvim.desktop
+text/javascript=nvim.desktop
+text/x-script.python=nvim.desktop
+
+# ── Office / LibreOffice ────────────────────────────────────
+# application/vnd.oasis.opendocument.text=libreoffice-writer.desktop
+# application/vnd.oasis.opendocument.spreadsheet=libreoffice-calc.desktop
+# application/vnd.oasis.opendocument.presentation=libreoffice-impress.desktop
+# application/vnd.oasis.opendocument.graphics=libreoffice-draw.desktop
+# application/vnd.oasis.opendocument.database=libreoffice-base.desktop
+# application/vnd.oasis.opendocument.formula=libreoffice-math.desktop
+# application/msword=libreoffice-writer.desktop
+# application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice-writer.desktop
+# application/vnd.ms-excel=libreoffice-calc.desktop
+# application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=libreoffice-calc.desktop
+# application/vnd.ms-powerpoint=libreoffice-impress.desktop
+# application/vnd.openxmlformats-officedocument.presentationml.presentation=libreoffice-impress.desktop
+# application/vnd.ms-powerpoint.presentation.macroEnabled.12=libreoffice-impress.desktop
+# application/vnd.oasis.opendocument.text-flat-xml=libreoffice-writer.desktop
+
+# ── Images ──────────────────────────────────────────────────
+image/png=org.gnome.gThumb.desktop
+image/jpeg=org.gnome.gThumb.desktop
+image/gif=org.gnome.gThumb.desktop
+image/webp=org.gnome.gThumb.desktop
+image/bmp=org.gnome.gThumb.desktop
+image/svg+xml=org.gnome.gThumb.desktop
+image/tiff=org.gnome.gThumb.desktop
+image/x-portable-pixmap=org.gnome.gThumb.desktop
+image/x-portable-bitmap=org.gnome.gThumb.desktop
+image/x-portable-graymap=org.gnome.gThumb.desktop
+image/x-portable-anymap=org.gnome.gThumb.desktop
+image/x-xbitmap=org.gnome.gThumb.desktop
+image/x-xpixmap=org.gnome.gThumb.desktop
+image/x-tga=org.gnome.gThumb.desktop
+image/vnd.microsoft.icon=org.gnome.gThumb.desktop
+image/x-icon=org.gnome.gThumb.desktop
+image/x-icns=org.gnome.gThumb.desktop
+# image/*=feh.desktop
+# image/*=imv.desktop
+# image/*=nsxiv.desktop
+# image/*=sxiv.desktop
+
+# ── Video ───────────────────────────────────────────────────
+video/mp4=mpv.desktop
+video/x-matroska=mpv.desktop
+video/webm=mpv.desktop
+video/x-msvideo=mpv.desktop
+video/quicktime=mpv.desktop
+video/x-flv=mpv.desktop
+video/x-mpeg=mpv.desktop
+video/mpeg=mpv.desktop
+video/3gpp=mpv.desktop
+video/ogg=mpv.desktop
+video/x-ogm+ogg=mpv.desktop
+application/x-matroska=mpv.desktop
+# video/*=mpv.desktop
+# video/*=vlc.desktop
+# video/*=celluloid.desktop
+# video/*=ffplay.desktop
+
+# ── Audio ───────────────────────────────────────────────────
+audio/mpeg=mpv.desktop
+audio/mp3=mpv.desktop
+audio/ogg=mpv.desktop
+audio/flac=mpv.desktop
+audio/x-flac=mpv.desktop
+audio/x-wav=mpv.desktop
+audio/wav=mpv.desktop
+audio/aac=mpv.desktop
+audio/mp4=mpv.desktop
+audio/x-m4a=mpv.desktop
+audio/opus=mpv.desktop
+audio/x-vorbis+ogg=mpv.desktop
+audio/webm=mpv.desktop
+audio/x-aiff=mpv.desktop
+audio/x-aac=mpv.desktop
+audio/midi=mpv.desktop
+audio/x-midi=mpv.desktop
+audio/x-scpls=mpv.desktop
+audio/x-mpegurl=mpv.desktop
+# audio/*=mpv.desktop
+# audio/*=vlc.desktop
+
+# ── Archives ────────────────────────────────────────────────
+application/zip=nemo.desktop
+application/x-tar=nemo.desktop
+application/x-gtar=nemo.desktop
+application/x-7z-compressed=nemo.desktop
+application/x-rar=nemo.desktop
+application/x-tar.gz=nemo.desktop
+application/gzip=nemo.desktop
+application/x-bzip=nemo.desktop
+application/x-bzip2=nemo.desktop
+application/x-xz=nemo.desktop
+application/x-zstd=nemo.desktop
+application/x-lz4=nemo.desktop
+application/x-snappy=nemo.desktop
+application/vnd.rar=nemo.desktop
+application/x-cpio=nemo.desktop
+application/x-deb=nemo.desktop
+application/x-rpm=nemo.desktop
+application/x-source-rpm=nemo.desktop
+application/x-msi=nemo.desktop
+application/x-appimage=nemo.desktop
+application/x-iso9660-image=nemo.desktop
+application/x-cd-image=nemo.desktop
+# application/zip=peazip.desktop
+# application/x-7z-compressed=peazip.desktop
+# application/x-rar=peazip.desktop
+
+# ── Torrents ────────────────────────────────────────────────
+application/x-bittorrent=org.qbittorrent.qBittorrent.desktop
+# x-scheme-handler/magnet=org.qbittorrent.qBittorrent.desktop
+
+# ── Code / IDE ──────────────────────────────────────────────
+text/x-python=nvim.desktop
+# text/x-python=code.desktop
+# text/x-python=emacs.desktop
+application/json=nvim.desktop
+application/xml=nvim.desktop
+text/xml=nvim.desktop
+text/x-cmake=nvim.desktop
+text/x-ini=nvim.desktop
+text/x-yaml=nvim.desktop
+text/x-toml=nvim.desktop
+text/x-nix=nvim.desktop
+
+# ── Miscellaneous ───────────────────────────────────────────
+x-scheme-handler/discord=vesktop.desktop
+x-scheme-handler/figma=figma-linux.desktop
+x-scheme-handler/hayase=hayase.desktop
+# x-scheme-handler/spotify=spotify.desktop
+# x-scheme-handler/steam=steam.desktop
+application/x-executable=nemo.desktop
+application/x-sharedlib=nemo.desktop
+application/octet-stream=nemo.desktop
+
+# ── Removable Media ─────────────────────────────────────────
+x-content/untyped=nemo.desktop
+x-content/blank-bd=nemo.desktop
+x-content/blank-cd=nemo.desktop
+x-content/blank-dvd=nemo.desktop
+x-content/blank-hdcd=nemo.desktop
+x-content/blank-tar=nemo.desktop
+x-content/blank-cd-r=nemo.desktop
+x-content/blank-cd-rw=nemo.desktop
+x-content/blank-dvd-r=nemo.desktop
+x-content/blank-dvd-rw=nemo.desktop
+x-content/blank-dvd-r DL=nemo.desktop
+x-content/blank-floppy=nemo.desktop
+x-content/audio-cd=mpv.desktop
+x-content/video-dvd=mpv.desktop
+x-content/video-bluray=mpv.desktop
+x-content/image-clipboard=org.gnome.gThumb.desktop
+
+[Added Associations]
+x-scheme-handler/http=vivaldi-stable.desktop;firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+x-scheme-handler/https=vivaldi-stable.desktop;firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+x-scheme-handler/chrome=userapp-Waterfox-KXNYR3.desktop;firefox.desktop;
+text/html=firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+application/x-extension-htm=firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+application/x-extension-html=firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+application/x-extension-shtml=firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+application/xhtml+xml=firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+application/x-extension-xhtml=firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+application/x-extension-xht=firefox.desktop;userapp-Waterfox-KXNYR3.desktop;
+application/pdf=sioyek.desktop;
+image/png=org.gnome.gThumb.desktop;feh.desktop;
+image/jpeg=org.gnome.gThumb.desktop;feh.desktop;
+image/webp=org.gnome.gThumb.desktop;feh.desktop;
+image/gif=org.gnome.gThumb.desktop;feh.desktop;
+image/bmp=org.gnome.gThumb.desktop;feh.desktop;
+video/mp4=mpv.desktop;vlc.desktop;
+video/x-matroska=mpv.desktop;vlc.desktop;
+audio/mpeg=mpv.desktop;vlc.desktop;
