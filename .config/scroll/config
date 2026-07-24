@@ -761,9 +761,11 @@ bindsym $mod+v exec vicinae vicinae://launch/clipboard/history
 #bindsym --release Super_L exec $menu
 
 # Screenshot (Area selection -> Save + Copy + Notify)
-bindsym $mod+Shift+S exec wayfreeze & sleep 0.1 && grim -g "$(slurp)" - | tee ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && kill %1 && notify-send "Screenshot Captured"
-bindsym $mod+Ctrl+S exec grim -g "$(slurp -c '#ff0000ff')" - | satty --filename -
+#bindsym $mod+Shift+S exec wayfreeze & sleep 0.1 && grim -g "$(slurp)" - | tee ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy && kill %1 && notify-send "Screenshot Captured"
+#bindsym $mod+Ctrl+S exec grim -g "$(slurp -c '#ff0000ff')" - | satty --filename -
 bindsym $mod+Shift+e exec rofimoji -a copy
+bindsym $mod+Shift+S exec ~/.config/scripts/screenshot-bin
+bindsym $mod+Ctrl+S exec ~/.config/scripts/screenshot-bin monitor
 # 
 # NERU
 bindsym $mod+Alt+c exec env XDG_CURRENT_DESKTOP=Sway /home/unc/Downloads/bin/neru activate recursive_grid
