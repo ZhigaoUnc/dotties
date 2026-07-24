@@ -17,7 +17,7 @@ set $down down
 set $up   up
 set $right right
 # Your preferred terminal emulator
-set $term kitty
+set $term ghostty
 # Your preferred application launcher
 #set $menu rofi -show drun
 set $menu vicinae run
